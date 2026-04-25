@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Food Donation Form</title>
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:400px;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:10px;
+}
+
+button{
+padding:10px;
+background:#007BFF;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Food Donation Form</h2>
+
+<form id="donorForm">
+
+<label>Name</label>
+<input type="text" id="name" required>
+
+<label>Email</label>
+<input type="email" id="email" placeholder="example@gmail.com" required>
+
+<button type="button" onclick="sendOTP()">Send OTP</button>
+
+<label>Enter OTP</label>
+<input type="text" id="otp" required>
+
+<button type="button" onclick="verifyOTP()">Verify OTP</button>
+
+<label>Food Details</label>
+<textarea id="foodDetails" required></textarea>
+
+<button type="submit">Submit Donation</button>
+
+</form>
+
+</div>
+
+<script>
+
+let verified=false;
+
+document.getElementById("email").addEventListener("input", function(){
+  verified = false;
+});
+
+function sendOTP(){
+  const email = document.getElementById("email").value;
+
+  fetch("http://localhost:5000/send-email-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ email: email })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      alert("OTP sent to your email");
+    } else {
+      alert("Failed to send OTP");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error sending OTP");
+  });
+}
+
+function verifyOTP(){
+  const email = document.getElementById("email").value;
+  const otp = document.getElementById("otp").value;
+
+  fetch("http://localhost:5000/verify-email-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ email: email, otp: otp })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      verified = true;
+      alert("Email OTP Verified");
+    } else {
+      alert(data.message || "Wrong OTP");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error verifying OTP");
+  });
+}
+
+// Form submission
+document.getElementById("donorForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    if(!verified){
+        alert("Please verify OTP first!");
+        return;
+    }
+
+   const donorData = {
+  name: document.getElementById("name").value,
+  email: document.getElementById("email").value,
+  foodDetails: document.getElementById("foodDetails").value
+};
+
+   fetch("http://localhost:5000/donor", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(donorData)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if(response.success){
+            // Redirect to your dedicated Thank You page
+            window.location.href = "thankyou.html";
+        } else {
+            alert("Failed to submit your donation. Try again.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error submitting form");
+    });
+});
+
+</script>
+
+</body>
+
+</html>

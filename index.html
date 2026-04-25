@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Donation Management System</title>
+  <style>
+    body.home-page {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      /* Gradient background */
+      background: linear-gradient(135deg, #ff7e5f, #feb47b, #6a11cb, #2575fc);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .buttons {
+      margin-bottom: 30px;
+      display: flex;
+      gap: 20px;
+    }
+
+    .btn {
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btnDonate {
+      background: #28a745;
+      color: white;
+    }
+    .btnDonate:hover {
+      background: #218838;
+    }
+
+    .btnRequest {
+      background: #ffc107;
+      color: #333;
+    }
+    .btnRequest:hover {
+      background: #e0a800;
+      color: white;
+    }
+
+    .btnAdmin {
+      background: #dc3545;
+      color: white;
+    }
+    .btnAdmin:hover {
+      background: #c82333;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 600px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #2575fc;
+    }
+
+    p {
+      margin: 15px 0;
+      font-size: 18px;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body class="home-page">
+  <!-- Navigation buttons -->
+  <div class="buttons">
+    <a href="donor.html" class="btn btnDonate">Donate Food</a>
+    <a href="receiver.html" class="btn btnRequest">Request Food</a>
+    <a href="admin.html" class="btn btnAdmin">Admin Panel</a>
+  </div>
+
+  <!-- Main container -->
+  <div class="container">
+    <h1>Welcome to Food Donation Management System</h1>
+    <p>Select your preferred language:</p>
+
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+      <option value="te">Telugu</option>
+    </select>
+
+    <!-- Speak button -->
+    <button type="button" onclick="readWelcome()">🔊 Speak</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

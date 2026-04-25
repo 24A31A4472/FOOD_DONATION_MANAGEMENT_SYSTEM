@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Food Receiver Form</title>
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(135deg,#a1c4fd,#c2e9fb,#fbc2eb,#f6d365);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container{
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+}
+
+input, textarea{
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+button{
+  padding: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover{
+  background: #1e7e34;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>Food Receiver Form</h2>
+
+<form id="receiverForm">
+
+  <label>Name</label>
+  <input type="text" id="name" required>
+
+<label>Email</label>
+<input type="email" id="email" placeholder="example@gmail.com" required>
+
+  <button type="button" onclick="sendOTP()">Send OTP</button>
+
+  <label>Enter OTP</label>
+  <input type="text" id="otp" required>
+
+  <button type="button" onclick="verifyOTP()">Verify OTP</button>
+
+  <label>Need Details</label>
+  <textarea id="needDetails" required></textarea>
+
+  <button type="submit">Submit Request</button>
+
+</form>
+
+</div>
+
+<script>
+let verified = false;
+
+document.getElementById("email").addEventListener("input", function(){
+  verified = false;
+});
+
+// Send OTP to the receiver's phone
+function sendOTP(){
+  const email = document.getElementById("email").value;
+
+  fetch("http://localhost:5000/send-email-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ email: email })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      alert("OTP sent to your email");
+    } else {
+      alert("Failed to send OTP");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error sending OTP");
+  });
+}
+
+// Verify OTP entered by the receiver
+function verifyOTP(){
+  const email = document.getElementById("email").value;
+  const otp = document.getElementById("otp").value;
+
+fetch("http://localhost:5000/verify-email-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ email: email, otp: otp })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      verified = true;
+      alert("Email OTP Verified");
+    } else {
+      alert(data.message || "Wrong OTP");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error verifying OTP");
+  });
+}
+
+// Form submission
+document.getElementById("receiverForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    if(!verified){
+        alert("Please verify OTP first!");
+        return;
+    }
+
+    const receiverData = {
+  name: document.getElementById("name").value,
+  email: document.getElementById("email").value,
+  needDetails: document.getElementById("needDetails").value
+};
+
+    fetch("http://localhost:5000/donor", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(receiverData)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if(response.success){
+            // Redirect to your dedicated Thank You page
+            window.location.href = "thankyou.html";
+        } else {
+            alert("Failed to submit your request. Try again.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error submitting form");
+    });
+});
+</script>
+
+</body>
+</html>
+

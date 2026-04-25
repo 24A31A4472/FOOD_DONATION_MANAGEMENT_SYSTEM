@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Food Donation System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #ff7e5f, #feb47b, #6a11cb, #2575fc);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: white;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .navbar-brand { font-size: 20px; font-weight: bold; }
+    .navbar-brand span { color: #f0a500; }
+    .navbar-right { display: flex; gap: 12px; align-items: center; }
+    .pending-pill {
+      background: #f0a500;
+      color: #1a1a2e;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .back-btn {
+      text-decoration: none;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.28); }
+
+    /* ── Stats ── */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 22px 28px 6px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      padding: 18px 26px;
+      flex: 1;
+      min-width: 130px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      text-align: center;
+      border-top: 4px solid #ddd;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card.c-blue   { border-top-color: #007BFF; }
+    .stat-card.c-green  { border-top-color: #28a745; }
+    .stat-card.c-yellow { border-top-color: #ffc107; }
+    .stat-card.c-teal   { border-top-color: #17a2b8; }
+    .stat-num { font-size: 34px; font-weight: bold; color: #222; }
+    .stat-lbl { font-size: 11px; color: #999; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.6px; }
+
+   
+
+    /* ── Section ── */
+    .content { padding: 0 28px 50px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 30px 0 12px;
+    }
+    .section-title { font-size: 18px; font-weight: bold; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .count-pill {
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .refresh-btn {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead tr { background: #1a1a2e; }
+    th {
+      color: #fff;
+      padding: 13px 16px;
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+    }
+
+    tbody tr { border-bottom: 1px solid #f1f3f5; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8f9fa; }
+
+    td { padding: 13px 16px; font-size: 14px; color: #444; vertical-align: middle; }
+
+    .td-num   { color: #aaa; font-size: 12px; }
+    .td-name  { font-weight: 600; color: #222; }
+    .td-phone { font-family: monospace; font-size: 13px; color: #555; }
+    .td-details {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #666;
+    }
+    .td-time  { font-size: 12px; color: #aaa; white-space: nowrap; }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .badge-pending  { background: #fff3cd; color: #856404; }
+    .badge-approved { background: #d4edda; color: #155724; }
+    .badge-rejected { background: #f8d7da; color: #721c24; }
+
+    /* Buttons */
+    .actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn-approve, .btn-ignore {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-approve { background: #28a745; color: white; }
+    .btn-approve:hover:not(:disabled) { background: #1e7e34; transform: translateY(-1px); }
+    .btn-ignore  { background: #dc3545; color: white; }
+    .btn-ignore:hover:not(:disabled)  { background: #c82333; transform: translateY(-1px); }
+    .btn-approve:disabled,
+    .btn-ignore:disabled  { background: #adb5bd; cursor: not-allowed; transform: none; }
+
+    .done-label {
+      font-size: 12px;
+      color: #28a745;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Empty row */
+    .empty-row td {
+      text-align: center;
+      padding: 32px;
+      color: #aaa;
+      font-style: italic;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      display: none;
+      z-index: 9999;
+      max-width: 380px;
+      line-height: 1.5;
+      animation: slideUp 0.3s ease;
+    }
+    .toast-success { background: #1e7e34; color: white; border-left: 5px solid #a3e6b5; }
+    .toast-error   { background: #c82333; color: white; border-left: 5px solid #f5c6cb; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Login Overlay ── */
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+    #loginBox {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 340px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: loginFadeIn 0.5s ease;
+    }
+    @keyframes loginFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #loginBox h2 { color: #f0a500; font-size: 22px; margin-bottom: 6px; }
+    #loginBox p  { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 28px; }
+    .login-field {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border 0.2s;
+    }
+    .login-field::placeholder { color: rgba(255,255,255,0.4); }
+    .login-field:focus { border-color: #f0a500; }
+    #loginBtn {
+      width: 100%;
+      padding: 12px;
+      background: #f0a500;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+    #loginBtn:hover { background: #e09400; transform: translateY(-1px); }
+    #loginError { color: #ff6b6b; font-size: 13px; margin-top: 12px; min-height: 18px; }
+    #logoutBtn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #logoutBtn:hover { background: rgba(255,255,255,0.28); }
+    #adminContent { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── Login Overlay ── -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h2>🔐 Admin Login</h2>
+    <p>Food Donation Management System</p>
+    <input class="login-field" type="text"     id="adminUser" placeholder="Username" autocomplete="off">
+    <input class="login-field" type="password" id="adminPass" placeholder="Password">
+    <button id="loginBtn" onclick="checkLogin()">Login</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── Admin Content (hidden until login) ── -->
+<div id="adminContent">
+
+<!-- Navbar -->
+<div class="navbar">
+  <div class="navbar-brand">🍱 Food Donation <span>Admin Panel</span></div>
+  <div class="navbar-right">
+    <span class="pending-pill" id="pendingPill">Loading…</span>
+    <button id="logoutBtn" onclick="adminLogout()">🔓 Logout</button>
+    <a href="index.html" class="back-btn">← Home</a>
+  </div>
+</div>
+
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-card c-blue">
+    <div class="stat-num" id="sDonors">—</div>
+    <div class="stat-lbl">Total Donors</div>
+  </div>
+  <div class="stat-card c-green">
+    <div class="stat-num" id="sReceivers">—</div>
+    <div class="stat-lbl">Total Receivers</div>
+  </div>
+  <div class="stat-card c-yellow">
+    <div class="stat-num" id="sPending">—</div>
+    <div class="stat-lbl">Pending</div>
+  </div>
+  <div class="stat-card c-teal">
+    <div class="stat-num" id="sApproved">—</div>
+    <div class="stat-lbl">Approved</div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Donors -->
+  <div class="section-header">
+    <div class="section-title">🍱 Donor Submissions</div>
+    <span class="count-pill" id="donorPill">…</span>
+    <button class="refresh-btn" onclick="loadAll()">🔄 Refresh</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th><th>Email</th>
+          <th>Food Details</th><th>Date</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="donorBody">
+        <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Receivers -->
+  <div class="section-header" style="margin-top:36px;">
+    <div class="section-title">🙏 Receiver Submissions</div>
+    <span class="count-pill" id="receiverPill">…</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Email</th>
+          
+          <th>Need Details</th><th>Date</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="receiverBody">
+        <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+</div> <!-- end #adminContent -->
+
+<script>
+  // ── Admin credentials (change these to your preferred username/password) ──
+  const ADMIN_USER = "Visweswara Rao";
+  const ADMIN_PASS = "zxcvbnm@anu";
+
+  // ── Login check ──────────────────────────────────────────
+  function checkLogin() {
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value;
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      sessionStorage.setItem("adminAuth", "true");
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("adminContent").style.display = "block";
+      loadAll();
+    } else {
+      document.getElementById("loginError").textContent = "❌ Incorrect username or password.";
+    }
+  }
+
+  // Allow pressing Enter to login
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && document.getElementById("loginOverlay").style.display !== "none") {
+      checkLogin();
+    }
+  });
+
+  // ── Logout ───────────────────────────────────────────────
+  function adminLogout() {
+    sessionStorage.removeItem("adminAuth");
+    document.getElementById("adminContent").style.display = "none";
+    document.getElementById("adminUser").value = "";
+    document.getElementById("adminPass").value = "";
+    document.getElementById("loginError").textContent = "";
+    document.getElementById("loginOverlay").style.display = "flex";
+  }
+
+  // ── Auto-restore session if already logged in ────────────
+  window.addEventListener("DOMContentLoaded", function() {
+    if (sessionStorage.getItem("adminAuth") === "true") {
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("adminContent").style.display = "block";
+      loadAll();
+    }
+  });
+  let allDonors = [], allReceivers = [];
+
+  // ── Toast ────────────────────────────────────────────────
+  function showToast(msg, type = "success") {
+    const el = document.getElementById("toast");
+    el.innerHTML = msg;
+    el.className = "toast-" + type;
+    el.style.display = "block";
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.display = "none"; }, 5000);
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function badge(status) {
+    return `<span class="badge badge-${status}">${status}</span>`;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" });
+  }
+
+  // ── Update stats ─────────────────────────────────────────
+  function updateStats() {
+    const all      = [...allDonors, ...allReceivers];
+    const pending  = all.filter(x => x.status === "pending").length;
+    const approved = all.filter(x => x.status === "approved").length;
+
+    document.getElementById("sDonors").textContent    = allDonors.length;
+    document.getElementById("sReceivers").textContent = allReceivers.length;
+    document.getElementById("sPending").textContent   = pending;
+    document.getElementById("sApproved").textContent  = approved;
+    document.getElementById("donorPill").textContent     = allDonors.length + " records";
+    document.getElementById("receiverPill").textContent  = allReceivers.length + " records";
+    document.getElementById("pendingPill").textContent   = pending + " Pending";
+  }
+
+  // ── Render Donors ────────────────────────────────────────
+  function renderDonors(list) {
+    const tbody = document.getElementById("donorBody");
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No donor submissions yet.</td></tr>';
+      return;
+    }
+    list.forEach((d, i) => {
+      const tr = document.createElement("tr");
+      tr.id = "drow-" + d._id;
+      tr.innerHTML = `
+        <td class="td-num">${i + 1}</td>
+        <td class="td-name">${d.name}</td>
+       <td class="td-phone">${d.email || "—"}</td>
+        <td class="td-details" title="${d.foodDetails}">${d.foodDetails}</td>
+        <td class="td-time">${formatDate(d.createdAt)}</td>
+        <td id="dst-${d._id}">${badge(d.status)}</td>
+        <td id="dact-${d._id}"></td>
+      `;
+      tbody.appendChild(tr);
+      buildDonorActions(d);
+    });
+  }
+
+  function buildDonorActions(d) {
+    const td = document.getElementById("dact-" + d._id);
+    if (!td) return;
+
+    if (d.status === "approved") {
+      td.innerHTML = `<span class="done-label">✅ Approved · 📱 SMS sent</span>`;
+      return;
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "actions";
+
+    // ── Approve ──
+    const aBtn = document.createElement("button");
+    aBtn.className = "btn-approve";
+    aBtn.innerHTML = "✅ Approve";
+    aBtn.onclick = () => {
+      aBtn.disabled = iBtn.disabled = true;
+      aBtn.innerHTML = `<span class="spinner"></span> Approving…`;
+      fetch(`http://localhost:5000/admin/approve-donor/${d._id}`, { method: "POST" })
+        .then(res => {
+          if (res.success) {
+            document.getElementById("dst-" + d._id).innerHTML = badge("approved");
+            const smsNote = res.smsSent ? "📱 SMS sent" : "⚠️ SMS failed (check Twilio)";
+            td.innerHTML = `<span class="done-label">✅ Approved · ${smsNote}</span>`;
+            d.status = "approved";
+            updateStats();
+            showToast(
+              res.smsSent
+                ? `✅ <strong>${d.name}</strong>'s donation approved.<br>📱 SMS sent to <strong>${d.phone}</strong>.`
+                : `✅ <strong>${d.name}</strong>'s donation approved.<br>⚠️ SMS could not be sent — check Twilio credentials.`,
+              res.smsSent ? "success" : "success"
+            );
+          } else {
+            aBtn.disabled = iBtn.disabled = false;
+            aBtn.innerHTML = "✅ Approve";
+            showToast("❌ Error: " + (res.error || res.message || "Unknown error"), "error");
+          }
+        })
+        .catch(() => {
+          aBtn.disabled = iBtn.disabled = false;
+          aBtn.innerHTML = "✅ Approve";
+          showToast("❌ Network error. Is the server running?", "error");
+        });
+    };
+
+    // ── Ignore ──
+    const iBtn = document.createElement("button");
+    iBtn.className = "btn-ignore";
+    iBtn.innerHTML = "🗑 Ignore";
+    iBtn.onclick = () => {
+      if (!confirm(`Ignore ${d.name}'s donation?\n\nAn SMS will be sent notifying them.`)) return;
+      aBtn.disabled = iBtn.disabled = true;
+      iBtn.innerHTML = `<span class="spinner"></span> Ignoring…`;
+      fetch(`http://localhost:5000/admin/reject-donor/${d._id}`, { method: "POST" })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            showToast(
+              `🗑 <strong>${d.name}</strong>'s donation has been <strong>ignored</strong>.<br>
+               📱 SMS sent to <strong>${d.phone}</strong>:<br>
+               <em>"Hello ${d.name}, your donation request could not be accepted at this time."</em>`,
+              "error"
+            );
+            const row = document.getElementById("drow-" + d._id);
+            row.style.transition = "opacity 0.4s";
+            row.style.opacity = "0";
+            setTimeout(() => {
+              row.remove();
+              allDonors = allDonors.filter(x => x._id !== d._id);
+              updateStats();
+            }, 420);
+          } else {
+            aBtn.disabled = iBtn.disabled = false;
+            iBtn.innerHTML = "🗑 Ignore";
+            showToast("❌ Error: " + (res.error || "Unknown"), "error");
+          }
+        })
+        .catch(() => {
+          aBtn.disabled = iBtn.disabled = false;
+          iBtn.innerHTML = "🗑 Ignore";
+          showToast("❌ Network error.", "error");
+        });
+    };
+
+    wrap.appendChild(aBtn);
+    wrap.appendChild(iBtn);
+    td.appendChild(wrap);
+  }
+
+  // ── Render Receivers ─────────────────────────────────────
+  function renderReceivers(list) {
+    const tbody = document.getElementById("receiverBody");
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No receiver submissions yet.</td></tr>';
+      return;
+    }
+    list.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.id = "rrow-" + r._id;
+      tr.innerHTML = `
+        <td class="td-num">${i + 1}</td>
+        <td class="td-name">${r.name}</td>
+        <td class="td-phone">${r.phone}</td>
+        <td class="td-details" title="${r.needDetails}">${r.needDetails}</td>
+        <td class="td-time">${formatDate(r.createdAt)}</td>
+        <td id="rst-${r._id}">${badge(r.status)}</td>
+        <td id="ract-${r._id}"></td>
+      `;
+      tbody.appendChild(tr);
+      buildReceiverActions(r);
+    });
+  }
+
+  function buildReceiverActions(r) {
+    const td = document.getElementById("ract-" + r._id);
+    if (!td) return;
+
+    if (r.status === "approved") {
+      td.innerHTML = `<span class="done-label">✅ Approved · 📱 SMS sent</span>`;
+      return;
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "actions";
+
+    // ── Approve ──
+    const aBtn = document.createElement("button");
+    aBtn.className = "btn-approve";
+    aBtn.innerHTML = "✅ Approve";
+    aBtn.onclick = () => {
+      aBtn.disabled = iBtn.disabled = true;
+      aBtn.innerHTML = `<span class="spinner"></span> Approving…`;
+      fetch(`http://localhost:5000/admin/approve-receiver/${r._id}`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("rst-" + r._id).innerHTML = badge("approved");
+            const smsNote = data.smsSent ? "📱 SMS sent" : "⚠️ SMS failed (check Twilio)";
+            td.innerHTML = `<span class="done-label">✅ Approved · ${smsNote}</span>`;
+            r.status = "approved";
+            updateStats();
+            showToast(
+              data.smsSent
+                ? `✅ <strong>${r.name}</strong>'s request approved.<br>📱 SMS sent to <strong>${r.phone}</strong>.`
+                : `✅ <strong>${r.name}</strong>'s request approved.<br>⚠️ SMS could not be sent — check Twilio credentials.`,
+              "success"
+            );
+          } else {
+            aBtn.disabled = iBtn.disabled = false;
+            aBtn.innerHTML = "✅ Approve";
+            showToast("❌ Error: " + (data.error || data.message || "Unknown"), "error");
+          }
+        })
+        .catch(() => {
+          aBtn.disabled = iBtn.disabled = false;
+          aBtn.innerHTML = "✅ Approve";
+          showToast("❌ Network error.", "error");
+        });
+    };
+
+    // ── Ignore ──
+    const iBtn = document.createElement("button");
+    iBtn.className = "btn-ignore";
+    iBtn.innerHTML = "🗑 Ignore";
+    iBtn.onclick = () => {
+      if (!confirm(`Ignore ${r.name}'s food request?\n\nAn SMS will be sent notifying them.`)) return;
+      aBtn.disabled = iBtn.disabled = true;
+      iBtn.innerHTML = `<span class="spinner"></span> Ignoring…`;
+      fetch(`http://localhost:5000/admin/delete-receiver/${r._id}`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast(
+              `🗑 <strong>${r.name}</strong>'s request has been <strong>ignored</strong>.<br>
+               📱 SMS sent to <strong>${r.phone}</strong>:<br>
+               <em>"Hello ${r.name}, your food request could not be fulfilled at this time."</em>`,
+              "error"
+            );
+            const row = document.getElementById("rrow-" + r._id);
+            row.style.transition = "opacity 0.4s";
+            row.style.opacity = "0";
+            setTimeout(() => {
+              row.remove();
+              allReceivers = allReceivers.filter(x => x._id !== r._id);
+              updateStats();
+            }, 420);
+          } else {
+            aBtn.disabled = iBtn.disabled = false;
+            iBtn.innerHTML = "🗑 Ignore";
+            showToast("❌ Error: " + (data.error || data.message || "Unknown"), "error");
+          }
+        })
+        .catch(() => {
+          aBtn.disabled = iBtn.disabled = false;
+          iBtn.innerHTML = "🗑 Ignore";
+          showToast("❌ Network error.", "error");
+        });
+    };
+
+    wrap.appendChild(aBtn);
+    wrap.appendChild(iBtn);
+    td.appendChild(wrap);
+  }
+
+  // ── Load all data ─────────────────────────────────────────
+function loadAll() {
+  document.getElementById("donorBody").innerHTML =
+    '<tr class="empty-row"><td colspan="7">Loading…</td></tr>';
+
+  document.getElementById("receiverBody").innerHTML =
+    '<tr class="empty-row"><td colspan="7">Loading…</td></tr>';
+
+  const p1 = fetch("http://localhost:5000/donors")
+    .then(r => r.json())
+    .then(data => {
+      allDonors = data;
+      renderDonors(data);
+    })
+    .catch(() => {
+      document.getElementById("donorBody").innerHTML =
+        '<tr class="empty-row"><td colspan="7">⚠ Cannot connect to local server. Make sure <code>node server.js</code> is running.</td></tr>';
+    });
+
+  const p2 = fetch("http://localhost:5000/receivers")
+    .then(r => r.json())
+    .then(data => {
+      allReceivers = data;
+      renderReceivers(data);
+    })
+    .catch(() => {
+      document.getElementById("receiverBody").innerHTML =
+        '<tr class="empty-row"><td colspan="7">⚠ Cannot connect to local server.</td></tr>';
+    });
+
+  Promise.all([p1, p2]).then(updateStats);
+}
+
+</script>
+</body>
+</html>
