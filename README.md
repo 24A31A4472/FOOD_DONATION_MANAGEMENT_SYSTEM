@@ -14,7 +14,11 @@ The Food Donation Management System is a mission-driven backend platform designe
 
 By automating food recovery logistics, the system helps reduce food waste and combat hunger in real-time.
 
-Built with a modern Node.js stack, the platform tracks surplus food and enables fast claiming through automated communication channels.
+Built with a modern Node.js stack, the platform tracks surplus food and enables fast claiming through an automated email-based communication system.
+
+--
+
+### 🚀 [Live Demo](https://magical-strudel-924473.netlify.app/)
 
 ---
 
@@ -22,8 +26,8 @@ Built with a modern Node.js stack, the platform tracks surplus food and enables 
 - Donor portal for submitting surplus food
 - Receiver portal for NGOs and shelters
 - Admin dashboard to monitor donations
-- Real-time SMS notifications using Twilio
-- Secure authentication using JSON Web Tokens (JWT)
+- Real-time Email notifications
+- Email-based OTP verification for secure access
 - MongoDB database with schema validation using Mongoose
 
 ---
@@ -39,7 +43,7 @@ Built with a modern Node.js stack, the platform tracks surplus food and enables 
 - Mongoose (Schema validation)
 
 ### APIs & Utilities
-- Twilio – SMS notifications
+- Nodemailer – Email OTP & notifications
 - Axios – External API requests
 - Day.js – Time and expiration handling
 
@@ -60,7 +64,7 @@ The system works as a centralized hub connecting donors and recipients.
    Mongoose schemas verify food data integrity before storing it in MongoDB.
 
 3. Notification Engine  
-   Twilio sends SMS alerts to nearby NGOs when a new donation is available.
+   The system sends Email alerts to donors and receivers for OTP verification and status updates.
 
 4. Claim System  
    NGOs or shelters claim donations and the system updates the status.
@@ -92,18 +96,20 @@ Food-Donation-Management-System
 ### Prerequisites
 - Node.js (v20+)
 - MongoDB Atlas or Local MongoDB
-- Twilio account for SMS notifications
+- Gmail account (for sending Email OTP and notifications)
+
+---
 
 ### Installation
 
-Clone the repository
-git clone https://github.com/YOUR-USERNAME/Food-Donation-Management-System.git
+Clone the repository  
+git clone https://github.com/YOUR-USERNAME/Food-Donation-Management-System.git  
 
-Navigate to the project folder
-cd Food-Donation-Management-System
+Navigate to the project folder  
+cd Food-Donation-Management-System  
 
-Install dependencies
-npm install
+Install dependencies  
+npm install  
 
 ---
 
@@ -112,20 +118,20 @@ Create a `.env` file in the root directory and add the following:
 
 PORT=3000  
 MONGODB_URI=your_mongodb_connection_string  
-TWILIO_ACCOUNT_SID=your_sid  
-TWILIO_AUTH_TOKEN=your_token  
+EMAIL_USER=your_gmail_address  
+EMAIL_PASS=your_gmail_app_password  
 JWT_SECRET=your_secret_key  
 
 ---
 
 ### Run the Application
-Start the server
+Start the server  
 
-npm start
+npm start  
 
-The application will run on:
+The application will run on:  
 
-http://localhost:3000
+http://localhost:3000  
 
 ---
 
@@ -146,6 +152,7 @@ This project is licensed under the MIT License.
 B.Tech Data Science Student  
 Passionate about building technology solutions to solve real-world problems.
 
+---
 
 ## 📸 Project Preview
 
